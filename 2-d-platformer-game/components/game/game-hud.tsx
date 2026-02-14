@@ -10,9 +10,10 @@ interface GameHUDProps {
   reachedFlag: boolean
   onRestart: () => void
   onBack: () => void
+  hasLost?: boolean
 }
 
-export function GameHUD({ runNumber, frameCount, hasShadow, reachedFlag, onRestart, onBack }: GameHUDProps) {
+export function GameHUD({ runNumber, frameCount, hasShadow, reachedFlag, onRestart, onBack, hasLost }: GameHUDProps) {
   return (
     <div className="flex items-center justify-between px-4 py-2.5">
       <div className="flex items-center gap-5">
@@ -70,7 +71,7 @@ export function GameHUD({ runNumber, frameCount, hasShadow, reachedFlag, onResta
             e.currentTarget.style.boxShadow = 'none'
           }}
         >
-          RESTART [R]
+          {hasLost ? 'RETRY [R]' : 'RESTART [R]'}
         </button>
       </div>
     </div>

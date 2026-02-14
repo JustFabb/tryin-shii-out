@@ -55,6 +55,9 @@ interface GameState {
   tutorialMoved: boolean
   tutorialJumped: boolean
   tutorialTeleported: boolean
+  hasLost: boolean
+  showLoseMessage: boolean
+  loseMessageTimer: number
 }
 
 function rectsOverlap(
@@ -97,6 +100,9 @@ export function useGameLoop(level: LevelData) {
     tutorialMoved: false,
     tutorialJumped: false,
     tutorialTeleported: false,
+    hasLost: false,
+    showLoseMessage: false,
+    loseMessageTimer: 0,
   })
 
   const [renderState, setRenderState] = useState({
@@ -111,6 +117,8 @@ export function useGameLoop(level: LevelData) {
     reachedFlag: false,
     showFlagMessage: false,
     tutorialStep: (level.hasTutorial ? 'move' : 'done') as TutorialStep,
+    hasLost: false,
+    showLoseMessage: false,
   })
 
   const rafRef = useRef<number>(0)
@@ -139,6 +147,9 @@ export function useGameLoop(level: LevelData) {
     gs.teleportTrails = []
     gs.showFlagMessage = false
     gs.flagMessageTimer = 0
+    gs.hasLost = false
+    gs.showLoseMessage = false
+    gs.loseMessageTimer = 0
     // Tutorial is done after first restart
     if (gs.tutorialStep !== 'done') {
       gs.tutorialStep = 'done'
@@ -222,6 +233,20 @@ export function useGameLoop(level: LevelData) {
         restart()
         setRenderState((prev) => ({ ...prev, showFlagMessage: false }))
       }
+      rafRef.current = requestAnimationFrame(gameLoop)
+      return
+    }
+
+    // If showing lose message, just tick the timer (wait for manual retry)
+    if (gs.showLoseMessage) {
+      gs.loseMessageTimer++
+      setRenderState((prev) => ({ ...prev, showLoseMessage: true, hasLost: true }))
+      rafRef.current = requestAnimationFrame(gameLoop)
+      return
+    }
+
+    // If player has lost, don't update game state
+    if (gs.hasLost) {
       rafRef.current = requestAnimationFrame(gameLoop)
       return
     }
@@ -399,6 +424,19 @@ export function useGameLoop(level: LevelData) {
           rafRef.current = requestAnimationFrame(gameLoop)
           return
         }
+
+        // Check if shadow reached flag before player
+        if (lev.flag && gs.runNumber > 0 && !gs.reachedFlag) {
+          const shadowFlagOverlap = rectsOverlap(
+            gs.shadowPos.x, gs.shadowPos.y, PLAYER_SIZE, PLAYER_SIZE,
+            lev.flag.x, lev.flag.y, FLAG_W, FLAG_H
+          )
+          if (shadowFlagOverlap) {
+            gs.hasLost = true
+            gs.showLoseMessage = true
+            gs.loseMessageTimer = 0
+          }
+        }
       }
     } else if (gs.shadowHistory && gs.shadowFrame >= gs.shadowHistory.length) {
       gs.shadowPos = null
@@ -418,6 +456,8 @@ export function useGameLoop(level: LevelData) {
       reachedFlag: gs.reachedFlag,
       showFlagMessage: gs.showFlagMessage,
       tutorialStep: gs.tutorialStep,
+      hasLost: gs.hasLost,
+      showLoseMessage: gs.showLoseMessage,
     })
 
     rafRef.current = requestAnimationFrame(gameLoop)
@@ -448,6 +488,9 @@ export function useGameLoop(level: LevelData) {
       gs.reachedFlag = false
       gs.showFlagMessage = false
       gs.flagMessageTimer = 0
+      gs.hasLost = false
+      gs.showLoseMessage = false
+      gs.loseMessageTimer = 0
       gs.tutorialStep = level.hasTutorial ? 'move' : 'done'
       gs.tutorialMoved = false
       gs.tutorialJumped = false
@@ -486,5 +529,5 @@ export function useGameLoop(level: LevelData) {
     }
   }, [gameLoop, restart])
 
-  return { ...renderState, restart }
+  return { ...renderState, restart, hasLost: renderState.hasLost, showLoseMessage: renderState.showLoseMessage }
 }

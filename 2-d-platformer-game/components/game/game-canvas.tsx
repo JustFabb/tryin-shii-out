@@ -24,6 +24,8 @@ interface GameCanvasProps {
   reachedFlag: boolean
   showFlagMessage: boolean
   tutorialStep: TutorialStep
+  hasLost?: boolean
+  showLoseMessage?: boolean
 }
 
 // Platform blocks - bright cyan/green outline to contrast purple bg
@@ -367,6 +369,42 @@ function FlagMessage() {
   )
 }
 
+// "You're too slow" message
+function LoseMessage() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center"
+    >
+      <div
+        className="flex flex-col items-center border px-12 py-8"
+        style={{
+          background: 'rgba(0, 0, 0, 0.95)',
+          borderColor: `#ff4444aa`,
+          boxShadow: `0 0 40px #ff444444`,
+        }}
+      >
+        <motion.span
+          animate={{ opacity: [1, 0.5, 1] }}
+          transition={{ duration: 0.8, repeat: Infinity }}
+          className="font-mono text-2xl font-bold tracking-wider"
+          style={{ color: '#ff5555', textShadow: `0 0 16px #ff555599` }}
+        >
+          YOU'RE TOO SLOW
+        </motion.span>
+        <span className="mt-3 font-mono text-xs text-muted-foreground">
+          {'Your shadow reached the flag first...'}
+        </span>
+        <span className="mt-3 font-mono text-xs" style={{ color: NEON_GREEN }}>
+          {'Click RETRY or press R to try again'}
+        </span>
+      </div>
+    </motion.div>
+  )
+}
+
 export function GameCanvas({
   level,
   playerPos,
@@ -378,6 +416,8 @@ export function GameCanvas({
   reachedFlag,
   showFlagMessage,
   tutorialStep,
+  hasLost,
+  showLoseMessage,
 }: GameCanvasProps) {
   return (
     <div
@@ -448,6 +488,11 @@ export function GameCanvas({
       {/* Flag reached message */}
       <AnimatePresence>
         {showFlagMessage && <FlagMessage />}
+      </AnimatePresence>
+
+      {/* Too slow message */}
+      <AnimatePresence>
+        {showLoseMessage && <LoseMessage />}
       </AnimatePresence>
 
       {/* Glitch overlay */}

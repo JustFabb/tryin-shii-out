@@ -27,6 +27,8 @@ export function GameSession({ level, levelIndex, onBack }: GameSessionProps) {
     showFlagMessage,
     tutorialStep,
     restart,
+    hasLost,
+    showLoseMessage,
   } = useGameLoop(level)
 
   return (
@@ -57,6 +59,7 @@ export function GameSession({ level, levelIndex, onBack }: GameSessionProps) {
           reachedFlag={reachedFlag}
           onRestart={restart}
           onBack={onBack}
+          hasLost={hasLost}
         />
       </div>
 
@@ -72,6 +75,8 @@ export function GameSession({ level, levelIndex, onBack }: GameSessionProps) {
         reachedFlag={reachedFlag}
         showFlagMessage={showFlagMessage}
         tutorialStep={tutorialStep}
+        hasLost={hasLost}
+        showLoseMessage={showLoseMessage}
       />
 
       {/* Controls */}

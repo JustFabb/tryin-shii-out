@@ -6,9 +6,9 @@ export const PLAYER_SIZE = 18
 export const WALL_WIDTH = 12
 
 // Physics - slower, more deliberate
-export const GRAVITY = 0.38
-export const JUMP_FORCE = -8.2
-export const MOVE_SPEED = 2.2
+export const GRAVITY = 0.2
+export const JUMP_FORCE = -7.0
+export const MOVE_SPEED = 1.2
 export const TELEPORT_DISTANCE = 90
 export const TELEPORT_WINDUP_FRAMES = 10
 export const TELEPORT_COOLDOWN_FRAMES = 40
